@@ -1,6 +1,8 @@
+# Install required libraries (only needed in Colab/first time)
 !pip install yfinance --quiet
 !pip install tensorflow --quiet
 !pip install scikit-learn --quiet
+
 
 import yfinance as yf
 import pandas as pd
@@ -15,22 +17,28 @@ from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 
+# Get stock ticker and date range from user
 ticker = input("Enter stock ticker (e.g., AAPL, TSLA): ")
 start_date = input("Enter start date (YYYY-MM-DD): ")
 end_date = input("Enter end date (YYYY-MM-DD): ")
 
+# Download historical stock data from Yahoo Finance
 data = yf.download(ticker, start=start_date, end=end_date)
 
+# If data has MultiIndex columns, flatten it
 if isinstance(data.columns, pd.MultiIndex):
     data.columns = [col[1] for col in data.columns]
 
+# Standardize column names
 data.columns = ['Open', 'High', 'Low', 'Close', 'Volume']
 
+# Feature engineering
 data['Return'] = data['Close'].pct_change()
 data['Volatility'] = data['Return'].rolling(window=5, min_periods=1).std()
 data['MA_10'] = data['Close'].rolling(window=10, min_periods=1).mean()
 data['MA_20'] = data['Close'].rolling(window=20, min_periods=1).mean()
 
+# RSI calculation
 delta = data['Close'].diff()
 gain = delta.clip(lower=0)
 loss = -delta.clip(upper=0)
@@ -39,15 +47,19 @@ avg_loss = loss.rolling(window=14, min_periods=1).mean()
 rs = avg_gain / avg_loss
 data['RSI'] = 100 - (100 / (1 + rs))
 
+# Remove any infinite or missing values
 data.replace([np.inf, -np.inf], np.nan, inplace=True)
 data.dropna(inplace=True)
 
+# Prepare features and target variable
 X = data[['Return', 'Volatility', 'MA_10', 'MA_20', 'RSI']]
 y = data['Close']
 
+# Scale feature values between 0 and 1
 scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X)
 
+# Split data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, shuffle=False)
 
 threshold = 100

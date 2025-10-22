@@ -61,8 +61,6 @@ StockPricePrediction/
 │
 ├── stock_predictor.py      # Main execution script
 ├── requirements.txt        # List of dependencies
-├── data/                   # Directory for storing input and processed data
-├── models/                 # Directory for saving trained models
 └── README.md               # Project documentation
 ```
 
@@ -88,4 +86,5 @@ You are free to use, modify, and distribute the code with appropriate attributio
 
 This project demonstrates an end-to-end stock price prediction pipeline using both deep learning and traditional machine learning methods.  
 It is suitable for learning stock market modeling, feature engineering, and interactive visualization using Python and Plotly.
+
 
